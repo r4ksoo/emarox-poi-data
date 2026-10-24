@@ -12,11 +12,17 @@ const FROM = arg('from', 'https://r4ksoo.github.io/emarox-poi-data/v1/');
 const OUT = path.join(arg('out', 'dist'), 'v1');
 
 async function get(rel) {
+    // Retries both HTTP errors (429 from the host) and dropped connections.
     for (let attempt = 1; ; attempt++) {
-        const r = await fetch(FROM + rel);
-        if (r.ok) return Buffer.from(await r.arrayBuffer());
-        if (attempt === 3) throw new Error(`${rel}: HTTP ${r.status}`);
-        await new Promise(res => setTimeout(res, 2000 * attempt));
+        let why;
+        try {
+            const r = await fetch(FROM + rel);
+            if (r.ok) return Buffer.from(await r.arrayBuffer());
+            why = `HTTP ${r.status}`;
+        } catch (err) { why = err.cause?.code || err.message; }
+        if (attempt === 6) throw new Error(`${rel}: ${why}`);
+        console.warn(`${rel}: ${why}, retry ${attempt}`);
+        await new Promise(res => setTimeout(res, 3000 * attempt));
     }
 }
 function save(rel, buf) {
@@ -35,6 +41,6 @@ async function worker() {
         save(rel, await get(rel));
     }
 }
-await Promise.all(Array.from({ length: 16 }, worker));
+await Promise.all(Array.from({ length: 6 }, worker));
 save('manifest.json', manifestBuf);    // last, so a partial copy never looks complete
 console.log(`mirrored ${files.length} files of build ${manifest.version}`);
