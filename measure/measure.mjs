@@ -9,13 +9,14 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { distM, distToRing, distToSegment } from '../build/geo.mjs';
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i > 0 ? process.argv[i + 1] : d; };
 const DIST = arg('dist', 'dist');
 const SRC = arg('sources');
 const BORDERS = arg('borders');
-const HERE = path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Z]:)/, '$1'));
+const HERE = path.dirname(fileURLToPath(import.meta.url));
 const CORRIDOR = 3000;
 
 // --- data ---

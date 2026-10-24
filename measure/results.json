@@ -1,0 +1,414 @@
+{
+ "built": "2026-10-24T14:20:45.861Z",
+ "routes": [
+  {
+   "id": "poznan-lyon",
+   "name": "Poznań → Lyon",
+   "km": 1468,
+   "counts": {
+    "fuel": 800,
+    "hotel": 582,
+    "service": 26,
+    "rest": 311,
+    "parking": 98,
+    "wash": 3
+   },
+   "tir": 684,
+   "bus": 1791,
+   "autobahn": {
+    "official": 163,
+    "foundInOsm": 152
+   },
+   "sstpa": {
+    "official": 0,
+    "foundInOsm": 0
+   },
+   "fr": {
+    "official": 128,
+    "foundInOsm": 106,
+    "foundTir": 9,
+    "osmStations": 156,
+    "osmConfirmed": 109
+   },
+   "es": {
+    "official": 0,
+    "foundInOsm": 0,
+    "foundTir": 0,
+    "osmStations": 0,
+    "osmConfirmed": 0
+   }
+  },
+  {
+   "id": "warszawa-mediolan",
+   "name": "Warszawa → Mediolan",
+   "km": 1575,
+   "counts": {
+    "fuel": 1069,
+    "rest": 286,
+    "hotel": 640,
+    "service": 13,
+    "parking": 54,
+    "wash": 4
+   },
+   "tir": 602,
+   "bus": 2049,
+   "autobahn": {
+    "official": 118,
+    "foundInOsm": 116
+   },
+   "sstpa": {
+    "official": 0,
+    "foundInOsm": 0
+   },
+   "fr": {
+    "official": 0,
+    "foundInOsm": 0,
+    "foundTir": 0,
+    "osmStations": 0,
+    "osmConfirmed": 0
+   },
+   "es": {
+    "official": 0,
+    "foundInOsm": 0,
+    "foundTir": 0,
+    "osmStations": 0,
+    "osmConfirmed": 0
+   }
+  },
+  {
+   "id": "krakow-sofia",
+   "name": "Kraków → Sofia",
+   "km": 1281,
+   "counts": {
+    "fuel": 537,
+    "hotel": 399,
+    "rest": 195,
+    "parking": 13,
+    "service": 4
+   },
+   "tir": 302,
+   "bus": 1144,
+   "autobahn": {
+    "official": 0,
+    "foundInOsm": 0
+   },
+   "sstpa": {
+    "official": 1,
+    "foundInOsm": 0
+   },
+   "fr": {
+    "official": 0,
+    "foundInOsm": 0,
+    "foundTir": 0,
+    "osmStations": 0,
+    "osmConfirmed": 0
+   },
+   "es": {
+    "official": 0,
+    "foundInOsm": 0,
+    "foundTir": 0,
+    "osmStations": 0,
+    "osmConfirmed": 0
+   }
+  },
+  {
+   "id": "gdansk-rotterdam",
+   "name": "Gdańsk → Rotterdam",
+   "km": 1233,
+   "counts": {
+    "hotel": 379,
+    "fuel": 811,
+    "rest": 234,
+    "parking": 55,
+    "service": 16,
+    "wash": 2
+   },
+   "tir": 551,
+   "bus": 1479,
+   "autobahn": {
+    "official": 79,
+    "foundInOsm": 79
+   },
+   "sstpa": {
+    "official": 0,
+    "foundInOsm": 0
+   },
+   "fr": {
+    "official": 0,
+    "foundInOsm": 0,
+    "foundTir": 0,
+    "osmStations": 0,
+    "osmConfirmed": 0
+   },
+   "es": {
+    "official": 0,
+    "foundInOsm": 0,
+    "foundTir": 0,
+    "osmStations": 0,
+    "osmConfirmed": 0
+   }
+  },
+  {
+   "id": "wroclaw-barcelona",
+   "name": "Wrocław → Barcelona",
+   "km": 2001,
+   "counts": {
+    "fuel": 1266,
+    "rest": 417,
+    "hotel": 925,
+    "service": 35,
+    "wash": 3,
+    "parking": 134
+   },
+   "tir": 917,
+   "bus": 2742,
+   "autobahn": {
+    "official": 153,
+    "foundInOsm": 138
+   },
+   "sstpa": {
+    "official": 5,
+    "foundInOsm": 2
+   },
+   "fr": {
+    "official": 374,
+    "foundInOsm": 312,
+    "foundTir": 64,
+    "osmStations": 436,
+    "osmConfirmed": 325
+   },
+   "es": {
+    "official": 253,
+    "foundInOsm": 237,
+    "foundTir": 18,
+    "osmStations": 251,
+    "osmConfirmed": 229
+   }
+  },
+  {
+   "id": "katowice-bukareszt",
+   "name": "Katowice → Bukareszt",
+   "km": 1187,
+   "counts": {
+    "fuel": 490,
+    "hotel": 296,
+    "service": 8,
+    "parking": 18,
+    "rest": 122,
+    "wash": 1
+   },
+   "tir": 190,
+   "bus": 926,
+   "autobahn": {
+    "official": 0,
+    "foundInOsm": 0
+   },
+   "sstpa": {
+    "official": 0,
+    "foundInOsm": 0
+   },
+   "fr": {
+    "official": 0,
+    "foundInOsm": 0,
+    "foundTir": 0,
+    "osmStations": 0,
+    "osmConfirmed": 0
+   },
+   "es": {
+    "official": 0,
+    "foundInOsm": 0,
+    "foundTir": 0,
+    "osmStations": 0,
+    "osmConfirmed": 0
+   }
+  }
+ ],
+ "official": {
+  "autobahn": {
+   "found": 485,
+   "of": 513,
+   "pct": "94.5 %",
+   "medianM": 0,
+   "p95M": 2.4868895707114596
+  },
+  "sstpa": {
+   "found": 2,
+   "of": 6,
+   "pct": "33.3 %"
+  },
+  "frFuel": {
+   "found": 418,
+   "of": 502,
+   "pct": "83.3 %",
+   "tirConfirmed": "17.5 %",
+   "medianM": 33.64708537384781,
+   "osmExistPct": "73.3 %"
+  },
+  "esFuel": {
+   "found": 237,
+   "of": 253,
+   "pct": "93.7 %",
+   "tirConfirmed": "7.6 %",
+   "medianM": 4.276083595199902,
+   "osmExistPct": "91.2 %"
+  }
+ },
+ "perCountry": {
+  "DE": {
+   "total": 3561,
+   "park": 813,
+   "parkSh": 147,
+   "parkWc": 590,
+   "parkCap": 525,
+   "parkNamed": 661,
+   "poly": 1984,
+   "fuel": 1674,
+   "fuelTir": 519,
+   "hotel": 1013
+  },
+  "PL": {
+   "total": 1912,
+   "park": 316,
+   "parkSh": 37,
+   "parkWc": 175,
+   "parkCap": 4,
+   "parkNamed": 184,
+   "poly": 1042,
+   "fuel": 873,
+   "fuelTir": 296,
+   "hotel": 711
+  },
+  "FR": {
+   "total": 1393,
+   "park": 325,
+   "parkSh": 31,
+   "parkWc": 221,
+   "parkCap": 254,
+   "parkNamed": 187,
+   "poly": 714,
+   "fuel": 592,
+   "fuelTir": 109,
+   "hotel": 450
+  },
+  "IT": {
+   "total": 401,
+   "park": 12,
+   "parkSh": 2,
+   "parkWc": 7,
+   "parkCap": 0,
+   "parkNamed": 7,
+   "poly": 101,
+   "fuel": 239,
+   "fuelTir": 8,
+   "hotel": 150
+  },
+  "CH": {
+   "total": 353,
+   "park": 26,
+   "parkSh": 3,
+   "parkWc": 20,
+   "parkCap": 2,
+   "parkNamed": 18,
+   "poly": 120,
+   "fuel": 210,
+   "fuelTir": 12,
+   "hotel": 116
+  },
+  "AT": {
+   "total": 105,
+   "park": 7,
+   "parkSh": 0,
+   "parkWc": 6,
+   "parkCap": 0,
+   "parkNamed": 6,
+   "poly": 66,
+   "fuel": 50,
+   "fuelTir": 6,
+   "hotel": 47
+  },
+  "BG": {
+   "total": 181,
+   "park": 34,
+   "parkSh": 0,
+   "parkWc": 14,
+   "parkCap": 0,
+   "parkNamed": 5,
+   "poly": 88,
+   "fuel": 90,
+   "fuelTir": 7,
+   "hotel": 57
+  },
+  "RS": {
+   "total": 341,
+   "park": 82,
+   "parkSh": 1,
+   "parkWc": 49,
+   "parkCap": 0,
+   "parkNamed": 26,
+   "poly": 155,
+   "fuel": 208,
+   "fuelTir": 36,
+   "hotel": 48
+  },
+  "HU": {
+   "total": 268,
+   "park": 107,
+   "parkSh": 2,
+   "parkWc": 83,
+   "parkCap": 0,
+   "parkNamed": 93,
+   "poly": 173,
+   "fuel": 138,
+   "fuelTir": 32,
+   "hotel": 21
+  },
+  "SK": {
+   "total": 254,
+   "park": 28,
+   "parkSh": 2,
+   "parkWc": 14,
+   "parkCap": 0,
+   "parkNamed": 28,
+   "poly": 130,
+   "fuel": 90,
+   "fuelTir": 20,
+   "hotel": 136
+  },
+  "NL": {
+   "total": 416,
+   "park": 70,
+   "parkSh": 3,
+   "parkWc": 24,
+   "parkCap": 0,
+   "parkNamed": 30,
+   "poly": 70,
+   "fuel": 247,
+   "fuelTir": 51,
+   "hotel": 98
+  },
+  "ES": {
+   "total": 515,
+   "park": 42,
+   "parkSh": 4,
+   "parkWc": 26,
+   "parkCap": 1,
+   "parkNamed": 26,
+   "poly": 245,
+   "fuel": 251,
+   "fuelTir": 16,
+   "hotel": 221
+  },
+  "RO": {
+   "total": 546,
+   "park": 75,
+   "parkSh": 1,
+   "parkWc": 29,
+   "parkCap": 0,
+   "parkNamed": 14,
+   "poly": 294,
+   "fuel": 311,
+   "fuelTir": 8,
+   "hotel": 153
+  }
+ }
+}
