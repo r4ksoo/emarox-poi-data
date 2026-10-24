@@ -42,9 +42,8 @@ jobs:
       - name: Safety check against the live build
         run: node build/check.mjs --dist dist
       - name: Let the app read the data from another origin (Cloudflare Pages)
-        run: printf '/*
-  Access-Control-Allow-Origin: *
-' > dist/_headers
+        run: |
+          printf '/*\n  Access-Control-Allow-Origin: *\n' > dist/_headers
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

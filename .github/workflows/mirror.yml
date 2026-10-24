@@ -17,7 +17,9 @@ jobs:
         with:
           node-version: 22
       - run: node build/mirror.mjs --out dist
-      - run: printf '/*\n  Access-Control-Allow-Origin: *\n' > dist/_headers
+      - name: Let the app read the data from another origin
+        run: |
+          printf '/*\n  Access-Control-Allow-Origin: *\n' > dist/_headers
       # First run only: the project does not exist yet. Later runs fail here harmlessly.
       - name: Create the Pages project
         continue-on-error: true
