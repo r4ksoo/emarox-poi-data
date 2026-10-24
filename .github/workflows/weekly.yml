@@ -1,0 +1,55 @@
+name: Weekly POI build
+
+# Every Monday night: rebuild the data set from fresh OpenStreetMap extracts and the
+# official lists, check it against the live build, publish to GitHub Pages.
+# Any failed step leaves the previous build online; GitHub e-mails the owner.
+on:
+  schedule:
+    - cron: '0 1 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install osmium==4.3.2
+      - name: Unit tests
+        run: node --test test/*.test.mjs
+      - name: Extract POI from every country
+        run: bash build/extract-all.sh work
+      - name: Official sources
+        run: node build/fetch-sources.mjs --out work/sources
+      - name: Build tiles
+        run: node build/build.mjs --raw work/raw --sources work/sources --out dist
+      - name: Safety check against the live build
+        run: node build/check.mjs --dist dist
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

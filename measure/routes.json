@@ -1,0 +1,8 @@
+[
+ {"id":"poznan-lyon","name":"Poznań → Lyon","from":[52.4064,16.9252],"to":[45.7640,4.8357]},
+ {"id":"warszawa-mediolan","name":"Warszawa → Mediolan","from":[52.2297,21.0122],"to":[45.4642,9.1900]},
+ {"id":"krakow-sofia","name":"Kraków → Sofia","from":[50.0647,19.9450],"to":[42.6977,23.3219]},
+ {"id":"gdansk-rotterdam","name":"Gdańsk → Rotterdam","from":[54.3520,18.6466],"to":[51.9244,4.4777]},
+ {"id":"wroclaw-barcelona","name":"Wrocław → Barcelona","from":[51.1079,17.0385],"to":[41.3874,2.1686]},
+ {"id":"katowice-bukareszt","name":"Katowice → Bukareszt","from":[50.2649,19.0238],"to":[44.4268,26.1025]}
+]
