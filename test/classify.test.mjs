@@ -83,3 +83,39 @@ test('official lists: one-to-one match, facts tagged with their source', () => {
     assert.equal(ss.matched, 1);
     assert.deepEqual([by(recs, 'n30').a.cert, by(recs, 'n30').a.sh, by(recs, 'n30').s.sh], ['gold', 1, 'e']);
 });
+
+test('VAN and TIR layers are separate for parkings, washes and workshops', () => {
+    const big = sq(51, 12, 0.0007);                 // ~78 m x 49 m, ~3800 m²
+    const small = sq(51.1, 12, 0.0002);             // ~300 m²
+    const recs = classifyRaw([
+        { k: 'w30', t: { amenity: 'parking', hgv: 'yes' }, c: [51.2, 12], g: sq(51.2, 12) },
+        { k: 'w31', t: { amenity: 'parking' }, c: [51.00035, 12.00035], g: big },
+        { k: 'w32', t: { amenity: 'parking' }, c: [51.1001, 12.0001], g: small },
+        { k: 'w33', t: { amenity: 'parking', parking: 'multi-storey', capacity: '400' }, c: [51.3, 12], g: sq(51.3, 12) },
+        { k: 'n34', t: { amenity: 'parking', capacity: '50', maxheight: '2.1' }, c: [51.4, 12] },
+        { k: 'n35', t: { amenity: 'parking', capacity: '60' }, c: [51.5, 12] },
+        { k: 'n36', t: { amenity: 'parking', access: 'customers', capacity: '200' }, c: [51.6, 12] },
+        { k: 'n40', t: { amenity: 'car_wash', hgv: 'yes' }, c: [52, 12] },
+        { k: 'n41', t: { amenity: 'car_wash' }, c: [52.1, 12] },
+        { k: 'n42', t: { amenity: 'car_wash', maxheight: '2.0' }, c: [52.2, 12] },
+        { k: 'n50', t: { shop: 'truck_repair' }, c: [53, 12] },
+        { k: 'n51', t: { shop: 'car_repair' }, c: [53.1, 12] },
+        { k: 'n52', t: { shop: 'tyres' }, c: [53.2, 12] },
+        { k: 'n53', t: { amenity: 'fuel', hgv: 'only' }, c: [53.3, 12] },
+    ]);
+    const mode = (id) => { const r = by(recs, id); return r ? `${r.tir ? 'T' : ''}${r.bus ? 'B' : ''}` : null; };
+    assert.equal(mode('w30'), 'T', 'truck park: TIR only');
+    assert.equal(mode('w31'), 'B', 'big open car park: VAN');
+    assert.equal(mode('w32'), null, 'small car park left out');
+    assert.equal(mode('w33'), null, 'multi-storey left out');
+    assert.equal(mode('n34'), null, 'too low for a van');
+    assert.equal(mode('n35'), 'B', 'capacity 50: VAN');
+    assert.equal(mode('n36'), null, 'customers only');
+    assert.equal(mode('n40'), 'T');
+    assert.equal(mode('n41'), 'B');
+    assert.equal(mode('n42'), null);
+    assert.equal(mode('n50'), 'T');
+    assert.equal(mode('n51'), 'B');
+    assert.equal(mode('n52'), 'B');
+    assert.equal(mode('n53'), 'T', 'truck-only station');
+});

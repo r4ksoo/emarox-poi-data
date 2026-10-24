@@ -6,11 +6,37 @@
 // Rules (poi.md section 2): a vehicle flag is set only when the data supports it, an attribute
 // is written only when a tag or a nearby mapped object confirms it — never guessed.
 
-import { distM, distToRing, pointInRing, simplify, round5 } from './geo.mjs';
+import { distM, distToRing, pointInRing, ringAreaM2, simplify, round5 } from './geo.mjs';
 
 const HGV_OK = new Set(['yes', 'designated', 'only']);
 const YES = (v) => v !== undefined && v !== 'no' && v !== '0';
 const CARDS = ['dkv', 'uta', 'as24', 'e100', 'eurowag'];
+
+// VAN layer (poi.md 2a): a van needs ~2.8 m of headroom; a car park counts only when it is
+// open, at ground level and big enough to leave a van for longer (or meant for coaches).
+const VAN_HEIGHT_M = 2.8;
+const VAN_PARK_MIN_M2 = 2500;
+const VAN_PARK_MIN_CAP = 50;
+const VAN_PARK_KINDS = new Set(['surface', 'layby']);
+
+function heightOk(t) {
+    if (!t.maxheight) return true;
+    const v = String(t.maxheight);
+    let m = parseFloat(v);
+    if (!(m > 0)) return true;                       // "default", "none", ...
+    if (v.includes("'")) m *= 0.3048;               // feet
+    return m >= VAN_HEIGHT_M;
+}
+
+function vanParkOk(raw) {
+    const t = raw.t;
+    if (t.access === 'customers' || t.motorcar === 'no') return false;
+    if (t.parking && !VAN_PARK_KINDS.has(t.parking)) return false;
+    if (!heightOk(t)) return false;
+    if (HGV_OK.has(t.bus) || HGV_OK.has(t.motorhome)) return true;
+    if (Number(t.capacity) >= VAN_PARK_MIN_CAP) return true;
+    return !!raw.g && ringAreaM2(raw.g) >= VAN_PARK_MIN_M2;
+}
 
 // Simple spatial hash for "what is near this point" lookups (cell ~ 1.1 km).
 class Grid {
@@ -72,11 +98,18 @@ export function classifyRaw(raws) {
         }
         if (a === 'parking' && !t.highway) {
             const hgv = HGV_OK.has(t.hgv) || Number(t['capacity:hgv']) > 0;
-            if (!excluded(t)) {
-                carparks.add({ lat, lng });
-                if (hgv) hgvParks.add({ lat, lng });
+            if (excluded(t)) continue;
+            carparks.add({ lat, lng });
+            if (hgv) hgvParks.add({ lat, lng });
+            const truck = hgv && t.hgv !== 'no' && t['capacity:hgv'] !== '0';
+            if (truck) mains.push(classifyOne(raw));
+            else if (vanParkOk(raw)) {
+                const r = baseRecord(raw, 'parking');
+                r.bus = true;
+                applyCommon(r, t);
+                mains.push(r);
             }
-            if (!hgv || t.hgv === 'no' || t['capacity:hgv'] === '0') continue;
+            continue;
         }
         if (excluded(t)) continue;
         const rec = classifyOne(raw);
@@ -139,16 +172,16 @@ function classifyOne(raw) {
         return r;
     }
     if (t.amenity === 'parking') {
+        // A truck park is the TIR layer; vans get their own car parks (vanParkOk).
         const r = baseRecord(raw, 'parking');
         r.tir = true;
-        r.bus = hgvTag !== 'only';
         applyCommon(r, t);
         return r;
     }
     if (t.amenity === 'fuel') {
         const r = baseRecord(raw, 'fuel');
         r.tir = HGV_OK.has(hgvTag) || t['fuel:HGV_diesel'] === 'yes';
-        r.bus = true;
+        r.bus = hgvTag !== 'only';
         if (t['fuel:HGV_diesel'] === 'yes') r.a.hgvd = 1;
         if (t['fuel:adblue'] === 'yes') r.a.adblue = 1;
         if (t['fuel:lng'] === 'yes') r.a.lng = 1;
@@ -164,15 +197,24 @@ function classifyOne(raw) {
         if (t.tourism === 'motel') r.a.motel = 1;
         return r;
     }
-    if (t.amenity === 'car_wash' && HGV_OK.has(hgvTag)) {
+    if (t.amenity === 'car_wash') {
+        // Truck wash = TIR layer; any other wash with van headroom = VAN layer.
         const r = baseRecord(raw, 'wash');
-        r.tir = true;
+        if (HGV_OK.has(hgvTag)) r.tir = true;
+        else if (heightOk(t)) r.bus = true;
+        else return null;
         if (t.opening_hours === '24/7') r.a.h24 = 1;
         return r;
     }
     if (t.shop === 'truck_repair' || t.shop === 'truck' || (t.shop === 'tyres' && HGV_OK.has(hgvTag))) {
         const r = baseRecord(raw, 'service');
         r.tir = true;
+        if (t.shop === 'tyres') r.a.tyres = 1;
+        return r;
+    }
+    if (t.shop === 'car_repair' || t.shop === 'tyres') {
+        const r = baseRecord(raw, 'service');
+        r.bus = true;
         if (t.shop === 'tyres') r.a.tyres = 1;
         return r;
     }

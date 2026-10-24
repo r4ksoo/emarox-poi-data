@@ -19,6 +19,7 @@ PAIRS = [
     ('highway', 'services'), ('highway', 'rest_area'),
     ('tourism', 'hotel'), ('tourism', 'motel'),
     ('shop', 'truck_repair'), ('shop', 'truck'), ('shop', 'tyres'),
+    ('shop', 'car_repair'),
 ]
 
 HELPER_AMENITIES = {'shower', 'toilets', 'restaurant', 'fast_food', 'cafe'}
@@ -29,6 +30,7 @@ KEEP_TAGS = {
     'parking:hgv', 'fuel:HGV_diesel', 'fuel:diesel', 'fuel:adblue', 'fuel:lng', 'fuel:cng',
     'payment:dkv', 'payment:uta', 'payment:as24', 'payment:e100', 'payment:eurowag',
     'motorcar', 'restaurant', 'disused', 'surveillance', 'fence', 'lit',
+    'maxheight', 'bus', 'motorhome',
 }
 
 
@@ -36,8 +38,6 @@ def is_main(tags):
     a = tags.get('amenity')
     if a in HELPER_AMENITIES:
         return False
-    if a == 'parking':
-        return tags.get('hgv') in ('yes', 'designated', 'only') or 'capacity:hgv' in tags
     return True
 
 

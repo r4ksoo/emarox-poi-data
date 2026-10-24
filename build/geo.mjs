@@ -27,6 +27,17 @@ export function centroid(ring) {
     return [cy / a, cx / a];
 }
 
+// Area of a closed ring in square metres (local equirectangular projection, fine below a few km).
+export function ringAreaM2(ring) {
+    const lat0 = rad(ring[0][0]);
+    const kx = R * Math.cos(lat0) * Math.PI / 180, ky = R * Math.PI / 180;
+    let s = 0;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        s += ring[j][1] * kx * ring[i][0] * ky - ring[i][1] * kx * ring[j][0] * ky;
+    }
+    return Math.abs(s) / 2;
+}
+
 export function pointInRing(lat, lng, ring) {
     let inside = false;
     for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
