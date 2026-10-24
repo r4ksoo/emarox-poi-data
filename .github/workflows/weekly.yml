@@ -1,7 +1,8 @@
 name: Weekly POI build
 
 # Every Monday night: rebuild the data set from fresh OpenStreetMap extracts and the
-# official lists, check it against the live build, publish to GitHub Pages.
+# official lists, check it against the live build, publish to Cloudflare Pages (the copy
+# the app reads first) and to GitHub Pages (its fallback).
 # Any failed step leaves the previous build online; GitHub e-mails the owner.
 on:
   schedule:
@@ -40,9 +41,18 @@ jobs:
         run: node build/build.mjs --raw work/raw --sources work/sources --out dist
       - name: Safety check against the live build
         run: node build/check.mjs --dist dist
+      - name: Let the app read the data from another origin (Cloudflare Pages)
+        run: printf '/*
+  Access-Control-Allow-Origin: *
+' > dist/_headers
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 3
 
   deploy:
     needs: build
@@ -53,3 +63,31 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  cloudflare:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      CF_READY: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+    steps:
+      - uses: actions/download-artifact@v4
+        if: env.CF_READY == 'true'
+        with:
+          name: dist
+          path: dist
+      # First run only: the project does not exist yet. Later runs fail here harmlessly.
+      - name: Create the Pages project
+        if: env.CF_READY == 'true'
+        continue-on-error: true
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages project create emarox-poi --production-branch=main
+      - name: Publish to Cloudflare Pages
+        if: env.CF_READY == 'true'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=emarox-poi --branch=main --commit-dirty=true
