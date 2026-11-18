@@ -119,3 +119,42 @@ test('VAN and TIR layers are separate for parkings, washes and workshops', () =>
     assert.equal(mode('n52'), 'B');
     assert.equal(mode('n53'), 'T', 'truck-only station');
 });
+
+test('more mapped facts confirm a truck station; hgv=no is kept as an explicit no', () => {
+    const recs = classifyRaw([
+        { k: 'n40', t: { amenity: 'fuel', brand: 'AS24' }, c: [45, 5] },
+        { k: 'n41', t: { amenity: 'fuel', name: 'Autohof Lohfelden' }, c: [45.1, 5] },
+        { k: 'n42', t: { amenity: 'fuel', name: 'Total' }, c: [45.2, 5] },
+        { k: 'n43', t: { amenity: 'parking', hgv: 'designated' }, c: [45.2005, 5] },   // ~55 m
+        { k: 'n44', t: { amenity: 'fuel', name: 'Shell' }, c: [45.3, 5] },
+        { k: 'n45', t: { amenity: 'parking', hgv: 'yes' }, c: [45.302, 5] },         // ~220 m
+        { k: 'n46', t: { amenity: 'fuel', hgv: 'no', brand: 'AS24' }, c: [45.4, 5] },
+        { k: 'n47', t: { amenity: 'fuel', name: 'Trucks & Co dealer', 'payment:dkv': 'yes' }, c: [45.5, 5] },
+    ]);
+    assert.deepEqual([by(recs, 'n40').tir, by(recs, 'n40').a.ts], [true, 'as24']);
+    assert.deepEqual([by(recs, 'n41').tir, by(recs, 'n41').a.ts], [true, 'name']);
+    assert.deepEqual([by(recs, 'n42').tir, by(recs, 'n42').a.ts], [true, 'park']);
+    assert.equal(by(recs, 'n44').tir, false, 'truck park too far away');
+    assert.deepEqual([by(recs, 'n46').tir, by(recs, 'n46').a.hx], [false, 1]);
+    assert.equal(by(recs, 'n47').tir, false, 'a fuel card alone is not proof');
+});
+
+test('French truck lanes confirm only the station they match', async () => {
+    const { mergeFrFuel } = await import('../build/merge.mjs');
+    const { parseFrFuel } = await import('../build/sources/frfuel.mjs');
+    const sites = parseFrFuel(
+        '<pdv id="1" latitude="4500000" longitude="500000"><services><service>Piste poids lourds</service></services></pdv>' +
+        '<pdv id="2" latitude="4510000" longitude="500000"><services><service>Lavage</service></services></pdv>' +
+        '<pdv id="3" latitude="4520000" longitude="500000"><services><service>Piste poids lourds</service></services></pdv>');
+    assert.deepEqual(sites.map((s) => s.hgvLane), [true, false, true]);
+    const recs = classifyRaw([
+        { k: 'n60', t: { amenity: 'fuel', name: 'Total' }, c: [45.0004, 5] },        // ~45 m from site 1
+        { k: 'n61', t: { amenity: 'fuel', name: 'Esso' }, c: [45.1003, 5] },         // site 2, no lane
+        { k: 'n62', t: { amenity: 'fuel', hgv: 'no' }, c: [45.2002, 5] },            // site 3, but hgv=no
+    ]);
+    const res = mergeFrFuel(recs, sites);
+    assert.deepEqual([by(recs, 'n60').tir, by(recs, 'n60').a.hgvl, by(recs, 'n60').s.hgvl], [true, 1, 'f']);
+    assert.equal(by(recs, 'n61').tir, false);
+    assert.equal(by(recs, 'n62').tir, false, 'an explicit hgv=no in OSM is not overridden');
+    assert.equal(res.confirmed, 1);
+});

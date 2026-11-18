@@ -15,11 +15,14 @@ Rebuilt every Monday by GitHub Actions and published on GitHub Pages:
 | [OpenStreetMap](https://www.openstreetmap.org/copyright) via [Geofabrik](https://download.geofabrik.de/) extracts | positions, outlines, names, facilities, fuel cards | ODbL 1.0 |
 | [EU list of certified Safe and Secure Truck Parking Areas](https://eu-parkings.eu/sstpas/sstpas-map/) (Delegated Regulation (EU) 2022/1012) | certification level; showers, toilets, food and security are mandatory at every certified site | European Commission |
 | [Autobahn GmbH des Bundes](https://verkehr.autobahn.de/o/autobahn/) open data | every truck rest area on German motorways with the official number of truck spaces | Datenlizenz Deutschland |
+| [Prix des carburants](https://www.prix-carburants.gouv.fr/rubrique/opendata/) (French government open data) | which fuel stations in France have a truck lane ("Piste poids lourds") | Licence Ouverte 2.0 (Etalab) |
 
 Rules: a fact is stored only when a source states it. Missing data stays missing; nothing is
 inferred, except that a fuel station inside a motorway service area (`highway=services`) is
-marked as reachable by trucks. Every attribute carries its source (`s`: `e` = EU list,
-`d` = Autobahn GmbH, otherwise OpenStreetMap). Prices are stored only with an operator's
+marked as reachable by trucks, and so is a station that is AS24-branded, named as a truck stop
+("Autohof", "Truck stop", "Relais routier") or has a mapped truck park within 100 m. A station OSM
+marks `hgv=no` carries `a.hx` and is never shown to trucks. Every attribute carries its source (`s`: `e` = EU list,
+`d` = Autobahn GmbH, `f` = French government list, otherwise OpenStreetMap). Prices are stored only with an operator's
 price list link and a check date.
 
 ## Licence

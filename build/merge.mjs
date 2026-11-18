@@ -4,11 +4,23 @@
 import { distM, distToRing } from './geo.mjs';
 
 function matchOneToOne(recs, sites, maxM, accept) {
+    // Accepted records bucketed by 0.01° × 0.015° cell: the candidate window below spans
+    // the neighbouring cells, so thousands of sites stay fast on a Europe-wide record list.
+    const cell = (lat, lng) => `${Math.floor(lat / 0.01)}:${Math.floor(lng / 0.015)}`;
+    const buckets = new Map();
+    for (const r of recs) {
+        if (!accept(r)) continue;
+        const k = cell(r.lat, r.lng);
+        if (!buckets.has(k)) buckets.set(k, []);
+        buckets.get(k).push(r);
+    }
     const pairs = [];
     for (let si = 0; si < sites.length; si++) {
         const s = sites[si];
-        for (const r of recs) {
-            if (!accept(r)) continue;
+        const cy = Math.floor(s.lat / 0.01), cx = Math.floor(s.lng / 0.015);
+        const near = [];
+        for (let y = cy - 1; y <= cy + 1; y++) for (let x = cx - 1; x <= cx + 1; x++) near.push(...(buckets.get(`${y}:${x}`) || []));
+        for (const r of near) {
             if (Math.abs(r.lat - s.lat) > 0.01 || Math.abs(r.lng - s.lng) > 0.015) continue;
             const d = r.poly ? distToRing(s.lat, s.lng, r.poly) : distM(r.lat, r.lng, s.lat, s.lng);
             if (d <= maxM) pairs.push([d, si, r]);
@@ -43,6 +55,22 @@ export function mergeSstpa(recs, sites) {
         for (const k of ['sec', 'sh', 'wc', 'food']) { r.a[k] = 1; r.s[k] = 'e'; }
     });
     return { matched: matched.size, added };
+}
+
+// French government station list: a station with "Piste poids lourds" confirms the TIR layer
+// for the OSM station it matches. The list's coordinates are at address precision (median
+// 34 m from OSM), hence 150 m. Every station takes part in the matching, so a truck-lane
+// station cannot claim an OSM station that belongs to a nearer one without a truck lane.
+// Stations missing from OSM are not added: the list carries no brand or name.
+export function mergeFrFuel(recs, sites) {
+    const matched = matchOneToOne(recs, sites, 150, (r) => r.cat === 'fuel' && !r.a.hx);
+    let confirmed = 0;
+    for (const [i, r] of matched) {
+        if (!sites[i].hgvLane) continue;
+        r.a.hgvl = 1; r.s.hgvl = 'f';
+        if (!r.tir) { r.tir = true; confirmed++; }
+    }
+    return { matched: matched.size, added: 0, confirmed };
 }
 
 export function mergeAutobahn(recs, sites) {

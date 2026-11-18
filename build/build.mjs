@@ -11,7 +11,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 import { classifyRaw } from './classify.mjs';
-import { mergeSstpa, mergeAutobahn } from './merge.mjs';
+import { mergeSstpa, mergeAutobahn, mergeFrFuel } from './merge.mjs';
 
 export const GRID = 0.5;
 export const tileKey = (lat, lng) => `${Math.floor(lat / GRID)}_${Math.floor(lng / GRID)}`;
@@ -55,13 +55,13 @@ async function main() {
     const datesFile = path.join(srcDir, 'dates.json');
     const dates = fs.existsSync(datesFile) ? JSON.parse(fs.readFileSync(datesFile, 'utf8')) : {};
     const official = {};
-    for (const [name, merge] of [['sstpa', mergeSstpa], ['autobahn', mergeAutobahn]]) {
+    for (const [name, merge] of [['sstpa', mergeSstpa], ['autobahn', mergeAutobahn], ['frfuel', mergeFrFuel]]) {
         const file = path.join(srcDir, `${name}.json`);
         if (!fs.existsSync(file)) continue;
         official[name] = JSON.parse(fs.readFileSync(file, 'utf8'));
         const res = merge(recs, official[name]);
         sources[name] = dates[name] || fs.statSync(file).mtime.toISOString().slice(0, 10);
-        console.log(`${name}: ${res.matched} matched, ${res.added} added`);
+        console.log(`${name}: ${res.matched} matched, ${res.added} added${res.confirmed != null ? `, ${res.confirmed} newly confirmed for trucks` : ''}`);
     }
 
     const tiles = new Map();
@@ -91,7 +91,9 @@ async function main() {
     for (const [name, data] of Object.entries(official)) {
         fs.writeFileSync(path.join(vDir, 'src', `${name}.json`), JSON.stringify(data));
     }
-    const manifest = { version: today, built: new Date().toISOString(), grid: GRID, sources, total: recs.length, counts, tiles: tileCounts };
+    // features: 'hx' = fuel records carry a.hx when OSM says hgv=no, so the app may show the rest
+    // of the unconfirmed stations in TIR mode (js/poi-core.js tirUnconfirmed).
+    const manifest = { version: today, built: new Date().toISOString(), grid: GRID, features: ['hx'], sources, total: recs.length, counts, tiles: tileCounts };
     fs.writeFileSync(path.join(vDir, 'manifest.json'), JSON.stringify(manifest));
     console.log(`Total ${recs.length} POI in ${tiles.size} tiles, ${(bytes / 1e6).toFixed(1)} MB, largest tile ${(biggest / 1e3).toFixed(0)} kB`);
     console.log(counts);

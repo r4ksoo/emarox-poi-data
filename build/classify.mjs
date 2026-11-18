@@ -11,6 +11,8 @@ import { distM, distToRing, pointInRing, ringAreaM2, simplify, round5 } from './
 const HGV_OK = new Set(['yes', 'designated', 'only']);
 const YES = (v) => v !== undefined && v !== 'no' && v !== '0';
 const CARDS = ['dkv', 'uta', 'as24', 'e100', 'eurowag'];
+const AS24 = /^as ?24\b/i;
+const TRUCK_STOP_NAME = /\b(autohof|truck ?stop|relais routier)\b/i;
 
 // VAN layer (poi.md 2a): a van needs ~2.8 m of headroom; a car park counts only when it is
 // open, at ground level and big enough to leave a van for longer (or meant for coaches).
@@ -153,6 +155,20 @@ export function classifyRaw(raws) {
         if (at) { r.tir = true; r.a.mop = 1; }
     }
 
+    // More mapped facts that a station serves trucks: AS24 is a card network for trucks only,
+    // "Autohof" / "Truck stop" names a truck stop, and a mapped truck park within 100 m.
+    for (const r of recs) {
+        if (r.cat !== 'fuel' || r.tir || r.t.hgv === 'no') continue;
+        const t = r.t;
+        if (AS24.test(t.brand || '') || AS24.test(t.name || '') || AS24.test(t.operator || '')) {
+            r.tir = true; r.a.ts = 'as24';
+        } else if (TRUCK_STOP_NAME.test(t.name || '')) {
+            r.tir = true; r.a.ts = 'name';
+        } else if (hgvParks.near(r.lat, r.lng, 100).some((p) => objDist(r, p.lat, p.lng) <= 100)) {
+            r.tir = true; r.a.ts = 'park';
+        }
+    }
+
     for (const r of recs) {
         if (r.poly) r.poly = simplify(r.poly, 2).map(([y, x]) => [round5(y), round5(x)]);
         r.lat = round5(r.lat); r.lng = round5(r.lng);
@@ -182,6 +198,7 @@ function classifyOne(raw) {
         const r = baseRecord(raw, 'fuel');
         r.tir = HGV_OK.has(hgvTag) || t['fuel:HGV_diesel'] === 'yes';
         r.bus = hgvTag !== 'only';
+        if (hgvTag === 'no') r.a.hx = 1;            // trucks explicitly not allowed
         if (t['fuel:HGV_diesel'] === 'yes') r.a.hgvd = 1;
         if (t['fuel:adblue'] === 'yes') r.a.adblue = 1;
         if (t['fuel:lng'] === 'yes') r.a.lng = 1;

@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fetchSstpa } from './sources/sstpa.mjs';
 import { fetchAutobahn } from './sources/autobahn.mjs';
+import { fetchFrFuel } from './sources/frfuel.mjs';
 
 const arg = (n, d) => { const i = process.argv.indexOf(`--${n}`); return i > 0 ? process.argv[i + 1] : d; };
 const OUT = arg('out', 'work/sources');
@@ -41,4 +42,7 @@ const dates = {
     sstpa: await one('sstpa', fetchSstpa),
     autobahn: await one('autobahn', fetchAutobahn),
 };
+// Added 2026-11-16: the first builds have no previous copy to fall back on, so a failure here
+// only leaves the French truck-lane confirmations out of this build instead of stopping it.
+try { dates.frfuel = await one('frfuel', fetchFrFuel); } catch (err) { console.warn(err.message); }
 fs.writeFileSync(path.join(OUT, 'dates.json'), JSON.stringify(dates));
